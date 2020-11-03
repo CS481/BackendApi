@@ -1,17 +1,14 @@
 <?php
-require_once('SimulationFactoryBackend/src/db/MongoConn.php');
+require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
-only_allow_method('POST');
+SimulationFactoryBackend\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'), false);
-$conn = SimulationFactoryBackend\MongoConn::constructFromJson($data);
+$db_conn_class = SimulationFactoryBackend\DBConnFactory();
+$conn = $db_conn_class::constructFromJson($data);
 try {
   $conn->beginTransaction();
-  $sim_instances = $conn->select('SimulationInstances', get_sim_instance_query($data));
-  // Cursor's broken
-  foreach($sim_instances as $instance) {
-    $sim_instance = $instance;
-    break;
-  }
+  $sim_instance = $conn->selectOne('SimulationInstances', get_sim_instance_query($data));
+
   if ($sim_instance->player1 == $data->user->username) {
     $cur_user = 'player1';
     $other_user = 'player2';
@@ -36,23 +33,14 @@ function update_response_record($conn, $sim_instance, $post_data, $cur_user, $ot
   $search_for = (object)['rounds' => $sim_instance->turn_number,
                          'simulation_id' => $sim_instance->simulation_id
                         ];
-  $frames = $conn->select('Frames', $search_for);
-  // Driver's broken
-  foreach($frames as $f) {
-    $frame = $f;
-    break;
-  }
+  $frame = $conn->selectOne('Frames', $search_for);
 
   $search_for = (object)[$other_user => $sim_instance->$other_user,
                          'simulation_id' => $sim_instance->simulation_id,
                          'round' => $sim_instance->turn_number
                         ];
-  $log_entries = $conn->select('ResponseRecords', $search_for);
+  $log_entry = $conn->selectOne('ResponseRecords', $search_for);
   // Driver's broken
-  foreach($log_entries as $entry) {
-    $log_entry = $entry;
-    break;
-  }
 
   $log_update = (object)[$cur_user => $sim_instance->$cur_user,
                          $cur_user.'_response' => $post_data->response

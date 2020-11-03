@@ -1,10 +1,10 @@
-  GNU nano 4.8                                                                                               FrameInitialization.php                                                                                                          
 <?php
-require_once('SimulationFactoryBackend/src/db/MongoConn.php');
+require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
-only_allow_method('POST');
+SimulationFactoryBackend\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'), false);
-$conn = SimulationFactoryBackend\MongoConn::constructFromJson($data);
+$db_conn_class = SimulationFactoryBackend\DBConnFactory();
+$conn = $db_conn_class::constructFromJson($data);
 try {
   $conn->beginTransaction();
   $frame_data->username = $data->user->username;

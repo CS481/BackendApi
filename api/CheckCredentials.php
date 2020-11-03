@@ -1,8 +1,8 @@
 <?php
-require_once('SimulationFactoryBackend/src/db/MongoConn.php');
+require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
-only_allow_method('POST');
+SimulationFactoryBackend\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'), false);
-SimulationFactoryBackend\MongoConn::constructFromJson($data);
-
+$db_conn_class = SimulationFactoryBackend\DBConnFactory();
+$db_conn_class::constructFromJson($data);
 ?>
