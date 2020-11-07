@@ -24,6 +24,7 @@ try {
     $insert_data = (object)['player1' => $data->user->username,
                             'player1_waiting' => true,
                             'player2_waiting' => true,
+                            'deadline' => time()+$simulation->response_timeout,
                             'simulation_id' => $data->simulation_id,
                             'turn_number' => 0,
                             'resources' => $simulation->resources

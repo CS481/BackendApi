@@ -40,7 +40,6 @@ function update_response_record($conn, $sim_instance, $post_data, $cur_user, $ot
                          'round' => $sim_instance->turn_number
                         ];
   $log_entry = $conn->selectOne('ResponseRecords', $search_for);
-  // Driver's broken
 
   $log_update = (object)[$cur_user => $sim_instance->$cur_user,
                          $cur_user.'_response' => $post_data->response
@@ -63,6 +62,7 @@ function update_response_record($conn, $sim_instance, $post_data, $cur_user, $ot
   $sim_instance->turn_number++;
   $sim_instance->player1_waiting = false;
   $sim_instance->player2_waiting = false;
+  $sim_instance->deadline = time()+$sim_instance->response_timeout;
 
   $conn->update('ResponseRecords', $log_update, $search_for);
   $conn->update('SimulationInstances', $sim_instance, get_sim_instance_query($post_data));
