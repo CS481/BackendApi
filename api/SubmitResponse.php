@@ -22,9 +22,9 @@ try {
 
   $response_count = (int)($sim_instance->player1_waiting) + (int)($sim_instance->player2_waiting);
   if ($response_count == 1) {
-    SimulationFactory\controller\update_response_record($conn, $sim_instance, $data->response, $cur_user, $other_user);
+    SimulationFactoryBackend\controller\update_response_record($conn, $sim_instance, $data->response, $cur_user, $other_user);
   } else {
-    SimulationFactory\controller\create_response_record($conn, $sim_instance, $data->response, $cur_user);
+    SimulationFactoryBackend\controller\create_response_record($conn, $sim_instance, $data->response, $cur_user);
   }
   $conn->submitTransaction();
 } catch (Exception $e)  {

@@ -1,15 +1,14 @@
 <?php
 require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
+require_once('SimulationFactoryBackend/src/controller/FrameController.php');
 SimulationFactoryBackend\util\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'), false);
 $db_conn_class = SimulationFactoryBackend\db\DBConnFactory();
 $conn = $db_conn_class::constructFromJson($data);
 try {
   $conn->beginTransaction();
-  $sim_data->username = $data->user->username;
-  $frame_data->simulation_id = $data->simulation_id;
-  $response->frame_id = $conn->insert('Frames', $sim_data);
+  $response->frame_id = SimulationFactoryBackend\controller\initialize_frame($conn, $data->user, $data->simulation_id);
   $conn->submitTransaction();
   print_r(json_encode($response));
 } catch (Exception $e)  {

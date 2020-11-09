@@ -1,5 +1,6 @@
 <?php
 require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
+require_once('SimulationFactoryBackend/src/db/DBOpException.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
 require_once('SimulationFactoryBackend/src/controller/StateController.php');
 SimulationFactoryBackend\util\only_allow_method('POST');
@@ -38,10 +39,19 @@ try {
     exit;
   }
 
-  $frame_search = (object)['simulation_id' => $data->simulation_id,
-                           'rounds' => $sim_instance->turn_number
-                          ];
-  $frame = $conn->selectOne('Frames', $frame_search);
+  try {
+    $frame_search = (object)['simulation_id' => $data->simulation_id,
+                             'rounds' => $sim_instance->turn_number
+                            ];
+    $frame = $conn->selectOne('Frames', $frame_search);
+  } catch (SimulationFactoryBackend\db\DBOpException $_) {
+    $sim_instance->turn_number = -1;
+    $conn->update('SimulationInstances', $sim_instance, (object)['_id' => $sim_instance->_id]);
+    $frame_search = (object)['simulation_id' => $data->simulation_id,
+                             'rounds' => $sim_instance->turn_number
+                            ];
+    $frame = $conn->selectOne('Frames', $frame_search);
+  }
 
   $response = (object)['user_waiting' => false,
                        'resources' => $sim_instance->resources,
@@ -51,7 +61,7 @@ try {
 
   print_r(json_encode($response));
   $conn->submitTransaction();
-} catch (Exception $e)  {
+} catch (Exception $e) {
   $conn->abortTransaction();
   throw $e;
 }
@@ -64,13 +74,13 @@ function submit_default_responses($conn, $sim_instance) {
 
   $waiting_count = (int)($sim_instance->player1_waiting) + (int)($sim_instance->player2_waiting);
   if ($waiting_count == 2) {
-    SimulationFactory\controller\create_response_record($conn, $sim_instance, $frame->default_action, 'player1');
-    SimulationFactory\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player2', 'player1');
+    SimulationFactoryBackend\controller\create_response_record($conn, $sim_instance, $frame->default_action, 'player1');
+    SimulationFactoryBackend\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player2', 'player1');
   } else if ($waiting_count == 1) {
     if ($sim_instance->player1_waiting) {
-      SimulationFactory\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player2', 'player1');
+      SimulationFactoryBackend\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player2', 'player1');
     } else {
-      SimulationFactory\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player1', 'player2');
+      SimulationFactoryBackend\controller\update_response_record($conn, $sim_instance, $frame->default_action, 'player1', 'player2');
     }
   }
 }
