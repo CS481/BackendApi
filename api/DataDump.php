@@ -2,6 +2,8 @@
 require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
 require_once('SimulationFactoryBackend/src/controller/DataDumpController.php');
+require_once('simulation-schema/php/IdRequestValidator.php');
+
 SimulationFactoryBackend\util\only_allow_method('POST');
 print_r($_POST);
 $data = json_decode(file_get_contents('php://input'));
