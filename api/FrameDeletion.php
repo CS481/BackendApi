@@ -2,6 +2,7 @@
 require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
 require_once('SimulationFactoryBackend/src/controller/FrameController.php');
+require_once('simulation-schema/php/FrameModValidator.php');
 SimulationFactoryBackend\util\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'));
 $db_conn_class = SimulationFactoryBackend\db\DBConnFactory();
