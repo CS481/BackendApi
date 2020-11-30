@@ -9,7 +9,7 @@ $db_conn_class = SimulationFactoryBackend\db\DBConnFactory();
 $conn = $db_conn_class::constructFromJson($data);
 try {
   $conn->beginTransaction();
-  $response->frame_id = SimulationFactoryBackend\controller\initialize_frame($conn, $data->user, $data->simulation_id);
+  $response->id = SimulationFactoryBackend\controller\initialize_frame($conn, $data->user, $data->id);
   $conn->submitTransaction();
   print_r(json_encode($response));
 } catch (Exception $e)  {
