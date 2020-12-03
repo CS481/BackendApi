@@ -2,7 +2,7 @@
 require_once('SimulationFactoryBackend/src/db/DBConnFactory.php');
 require_once('SimulationFactoryBackend/src/db/DBOpException.php');
 require_once('SimulationFactoryBackend/src/util/check_method.php');
-require_once('simulation-schema/php/SimModValidator.php');
+require_once('simulation-schema/php/IdRequestValidator.php');
 SimulationFactoryBackend\util\only_allow_method('POST');
 $data = json_decode(file_get_contents('php://input'), false);
 $db_conn_class = SimulationFactoryBackend\db\DBConnFactory();
@@ -13,7 +13,7 @@ try {
   // Easier to ask forgiveness than permission
   try {
     $query = (object)['player2' => $conn->not_set(),
-                      'simulation_id' => $data->simulation_id
+                      'simulation_id' => $data->id
                      ];
     $update_data = (object)['player2' => $data->user->username,
                             'player1_waiting' => false,
@@ -22,11 +22,11 @@ try {
                            ];
     $conn->update($sim_instance_collection, $update_data, $query);
   } catch (SimulationFactoryBackend\db\DBOpException $e) {
-    $simulation = $conn->selectOne('Simulations', (object)['_id' => $data->simulation_id]);
+    $simulation = $conn->selectOne('Simulations', (object)['_id' => $data->id]);
     $insert_data = (object)['player1' => $data->user->username,
                             'player1_waiting' => true,
                             'player2_waiting' => true,
-                            'simulation_id' => $data->simulation_id,
+                            'simulation_id' => $data->id,
                             'turn_number' => 0,
                             'resources' => $simulation->resources,
                             'response_timeout' => $simulation->response_timeout
