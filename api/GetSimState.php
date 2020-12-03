@@ -13,7 +13,7 @@ $conn = $db_conn_class::constructFromJson($data);
 try {
   $conn->beginTransaction();
   $search_for = $conn->or((object)['player1' => $data->user->username], (object)['player2' => $data->user->username]);
-  $search_for->simulation_id = $data->simulation_id;
+  $search_for->simulation_id = $data->id;
   $sim_instance = $conn->selectOne('SimulationInstances', $search_for);
 
   if (isset($sim_instance->player2) && time() > $sim_instance->deadline) {
@@ -42,14 +42,14 @@ try {
   }
 
   try {
-    $frame_search = (object)['simulation_id' => $data->simulation_id,
+    $frame_search = (object)['simulation_id' => $data->id,
                              'rounds' => $sim_instance->turn_number
                             ];
     $frame = $conn->selectOne('Frames', $frame_search);
   } catch (SimulationFactoryBackend\db\DBOpException $_) {
     $sim_instance->turn_number = -1;
     $conn->update('SimulationInstances', $sim_instance, (object)['_id' => $sim_instance->_id]);
-    $frame_search = (object)['simulation_id' => $data->simulation_id,
+    $frame_search = (object)['simulation_id' => $data->id,
                              'rounds' => $sim_instance->turn_number
                             ];
     $frame = $conn->selectOne('Frames', $frame_search);
